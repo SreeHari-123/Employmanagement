@@ -1,7 +1,7 @@
 import express from 'express';
 import { sp } from "@pnp/sp-commonjs";
 import { SPFetchClient } from "@pnp/nodejs-commonjs";
-import employyRoutes from './routes/employ'
+import employRoutes from './routes/employ'
 import cors from 'cors'
 
 const app = express();
@@ -19,20 +19,9 @@ const SpfxConnection = () => {
 };
 
 SpfxConnection();
-
-// const getAllItems = async () => {
-
-//     const response = await sp.web.lists.getByTitle("employyy").items.getAll();
-
-//     console.log(response);
-// };
-
-// getAllItems();
-
 app.use(express.json());
 app.use(cors())
-app.use("/",employyRoutes);
-
+app.use("/",employRoutes);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

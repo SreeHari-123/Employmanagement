@@ -17,12 +17,13 @@ import { useNavigate } from "react-router-dom";
 const useStyles = makeStyles((theme) => ({
   root: {
     maxWidth: 345,
-    backgroundColor: "#f3e5f5",
+    backgroundColor: "#e0e0e0",
     boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
     marginLeft:"35px",
     marginTop:"20px"
   },
   media: {
+    marginTop:theme.spacing(1),
     height: 140,
     width: 140,
     borderRadius: "50%",
@@ -36,10 +37,13 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   search: {
-    width: "100%",
+    marginTop:theme.spacing(1),
+    width: "50%",
     marginBottom: theme.spacing(2),
   },
   addButton: {
+    marginTop:theme.spacing(2),
+    marginLeft:theme.spacing(2),
     marginBottom: theme.spacing(2),
   },
 }));
@@ -117,18 +121,18 @@ const Cards = () => {
                 <CardMedia
                   className={classes.media}
                   image="https://static.vecteezy.com/system/resources/thumbnails/012/415/723/small/portrait-of-successful-businesswoman-free-photo.jpg"
-                  title={data?.first_name}
+                  // title={data?.first_name}
                 />
                 <CardContent>
                   <Typography gutterBottom variant="h5" component="h2">
                     {data?.first_name}
-                  </Typography>
-                     <Typography variant="body2" color="textSecondary" component="p">
-                        {data?.email}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary" component="p">
+                    <Typography variant="body1" color="textSecondary" component="h2">
                         {data?.designation}
                       </Typography>
+                      <Typography variant="body1" color="textSecondary" component="h2">
+                        {data?.email}
+                      </Typography>
+                  </Typography>
                     </CardContent>
                   </CardActionArea>
                 </Card>

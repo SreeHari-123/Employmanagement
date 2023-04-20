@@ -3,9 +3,10 @@ export interface IEmployee  {
     first_name?: string;
     email?: string;
     gender?: string;
+    department?:string;
     designation?: string;
     phone?: string;
     city?: string;
     dob?: string;
-    image_url?: string;
+    image?: string;
   }
