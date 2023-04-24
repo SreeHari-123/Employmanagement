@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import fileUpload from "express-fileupload";
 import { sp } from "@pnp/sp-commonjs";
+import getContentType from "../getContentType";
 
 const getAllEmploys = async (req: Request, res: Response) => {
   try {
@@ -289,6 +289,19 @@ const getFilesInDirectory = async (req: Request, res: Response) => {
     });
   }
 };
+//download files
+const downloadFile = async (req: Request, res: Response) => {
+  const serverRelativePath = req.query.serverRelativePath as string;
+  const file = sp.web.getFileByServerRelativePath(serverRelativePath);
+  const buffer: ArrayBuffer = await file.getBuffer();
+  
+  const fileName = serverRelativePath.split('/').pop() || ''; // get the file name with extension
+  const contentType = getContentType(fileName); // get the content type based on file extension
+
+  res.setHeader('Content-disposition', `attachment; filename=${fileName}`);
+  res.setHeader('Content-type', contentType);
+  res.status(200).send(Buffer.from(buffer));
+};
 export {
   getAllEmploys,
   deleteEmploy,
@@ -298,4 +311,5 @@ export {
   uploadImage,
   uploadDocument,
   getFilesInDirectory,
+  downloadFile
 };

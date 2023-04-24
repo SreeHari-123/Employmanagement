@@ -10,7 +10,6 @@ function TaB() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // determine the value of the currently selected tab based on the URL
   let value = 0;
   if (location.pathname.includes('profile')) {
     value = 1;

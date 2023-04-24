@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     maxWidth: 600,
     margin: "auto",
     marginTop: 50,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#9fa8da",
     height: 700,
   },
   media: {
@@ -69,7 +69,6 @@ const ProfileCard = () => {
   const [dob, setDob] = useState<any>(null);
   const [Id, setId] = useState<any>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [image, setImage] = useState<any>(null);
   const [profilepic, setProfilepic] = useState<any>(null);
   const [isLoad, setLoad] = useState<boolean>(true);
   const [edit, setEdit] = useState<boolean>(false);
@@ -122,23 +121,23 @@ const ProfileCard = () => {
           },
         })
         .then((response) => console.log(response));
-      // return window.location.reload();
+      return window.location.reload();
     } catch (error) {
       console.log(error);
     }
   };
   const handleFileSelect = (event: any) => {
     setSelectedFile(event.target.files ? event.target.files[0] : null);
-    setImage(event.target.files ? URL.createObjectURL(event.target.files[0]) : null);
+    setProfilepic(event.target.files ? URL.createObjectURL(event.target.files[0]) : null);
   };
-  
-  
+
+
   const handleFileUpload = async () => {
     if (!selectedFile) return;
-  
+
     const formData = new FormData();
     formData.append('image', selectedFile);
-  
+
     try {
       const response = await axios.put(`http://localhost:5000/image/${id}`, formData, {
         headers: {
@@ -146,13 +145,13 @@ const ProfileCard = () => {
         },
       });
       console.log(response)
-  
-      setImage(response.data.image);
+
+      setProfilepic(response.data.image);
     } catch (error) {
       console.log(error);
     }
   };
-  
+
   const handleCancel = () => {
     return window.location.reload();
   };
@@ -169,7 +168,7 @@ const ProfileCard = () => {
   return (
     <>
       <NavBar />
-   <TaB/>
+      <TaB />
       {isLoad ? (
         <>
           <div className="center-body">
@@ -432,7 +431,6 @@ const ProfileCard = () => {
                 )}
               </div>
             </CardContent>
-
           </Card>
           <Footer />
         </>

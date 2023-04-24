@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: 345,
     backgroundColor: "#e0e0e0",
     boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-    marginLeft:"35px",
+    marginLeft:"75px",
     marginTop:"20px"
   },
   media: {
@@ -57,7 +57,6 @@ const Cards:React.FC<Props> = ({employee}) => {
   const [isLoad, setLoad] = useState<boolean>(true);
   const [search, setSearch] = useState<string>("");
   const classes = useStyles();
-  const {image}= employee;
   const navigate = useNavigate();
 
   const getAllEmployee = async () => {

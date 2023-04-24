@@ -1,123 +1,44 @@
-// import React, { useRef as importedUseRef, useState } from "react";
-// import NavBar from "./NavBar";
-// import SearchBar from "./SearchBar";
-// import Footer from "./Footer";
-// import { Grid, Typography, IconButton, makeStyles, Tab, Tabs } from "@material-ui/core";
-// import CloudUploadIcon from "@material-ui/icons/CloudUpload";
-// import DeleteIcon from "@material-ui/icons/Delete";
-// import { useNavigate,useParams } from "react-router-dom";
-// import TaB from "./TaB";
-
-
-// const useStyles = makeStyles((theme) => ({
-//   root: {
-//     flexGrow: 1,
-//   },
-//   iconButton: {
-//     marginRight: theme.spacing(1),
-//   },
-//   icon: {
-//     fontSize: 50,
-//   },
-//   fileName: {
-//     margin: "0 10px",
-//   },
-//   deleteButton: {
-//     marginLeft: theme.spacing(1),
-//   },
-// }));
-
-// const Document: React.FC = () => {
-//   const { id } = useParams();
-//   const fileInputRef = importedUseRef<HTMLInputElement>(null);
-//   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-//   const classes = useStyles();
-
-//   const handleFileInputChange = () => {
-//     const file = fileInputRef.current?.files?.[0];
-//     if (file) {
-//       setSelectedFiles([...selectedFiles, file]);
-//       console.log(`Selected file: ${file.name}`);
-//     }
-//   };
-
-//   const handleFileDelete = (index: number) => {
-//     const newSelectedFiles = [...selectedFiles];
-//     newSelectedFiles.splice(index, 1);
-//     setSelectedFiles(newSelectedFiles);
-//   };
-//   const navigate= useNavigate();
-
-
-//   return (
-//     <>
-//       <NavBar />
-//       <TaB/>
-//       <SearchBar />
-//       <div className={classes.root}>
-//         <Grid container spacing={3}>
-//           <Grid item xs={12} sm={6} md={4} lg={3}>
-//             <input
-//               type="file"
-//               accept=".doc,.docx,.pdf"
-//               ref={fileInputRef}
-//               onChange={handleFileInputChange}
-//               hidden
-//             />
-//             <IconButton
-//               style={{ backgroundColor: "blue", color: "white" }}
-//               className={classes.iconButton}
-//               onClick={() => fileInputRef.current?.click()}
-//             >
-//               <CloudUploadIcon className={classes.icon} />
-//               <Typography>
-//                 <h4>DOCUMENTS</h4>
-//               </Typography>
-//             </IconButton>
-//             {selectedFiles.map((file, index) => (
-//               <div key={file.name}>
-//                 <Typography variant="subtitle1" className={classes.fileName}>
-//                   <h4> {file.name}</h4>
-//                 </Typography>
-//                 <IconButton
-//                   style={{ backgroundColor: "red", color: "white" }}
-//                   className={classes.deleteButton}
-//                   onClick={() => handleFileDelete(index)}
-//                 >
-//                   <DeleteIcon />
-//                 </IconButton>
-//               </div>
-//             ))}
-//           </Grid>
-//         </Grid>
-//         <Footer />
-//       </div>
-//     </>
-//   );
-// };
-
-// export default Document;
-import * as React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import { makeStyles } from '@material-ui/core/styles';
+import { Button, Container, Grid, IconButton, Input, List, ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, Paper, Typography } from "@material-ui/core";
+import { CloudUpload, GetApp, InsertDriveFile } from "@material-ui/icons";
 import TaB from "./TaB";
-import { Navbar } from "react-bootstrap";
 import NavBar from "./NavBar";
 import Footer from "./Footer";
-import { Card, CardContent, CardMedia } from "@material-ui/core";
+import React from "react";
+import qs from "qs";
 
 interface Document {
-  id: any;
+  id: number;
   Name: string;
   url: string;
-  odata:string;
-  "odata.id":string;
-  ServerRelativeUrl:string;
+  ServerRelativeUrl: string;
+
 }
-let odata : any
+const useStyles = makeStyles({
+  paper: {
+    padding: '1rem',
+    marginBottom: '1rem',
+    backgroundColor: '#F8F8F8',
+    boxShadow: '0px 3px 5px -1px rgba(0,0,0,0.2), 0px 6px 10px 0px rgba(0,0,0,0.14), 0px 1px 18px 0px rgba(0,0,0,0.12)',
+  },
+  input: {
+    marginTop: '0.5rem',
+    backgroundColor: 'white',
+    borderRadius: '4px',
+  },
+  title: {
+    fontWeight: 'bold',
+    marginBottom: '0.5rem',
+  },
+});
+
+
 const Document: React.FC = () => {
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const [files, setFiles] = React.useState<Document[]>([]);
+  const [searchText, setSearchText] = React.useState("");
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -141,22 +62,21 @@ const Document: React.FC = () => {
         formData
       );
 
-     console.log(response.data)
+      console.log(response.data)
       setSelectedFile(null);
-      // window.location.reload();
+      window.location.reload();
     } catch (error) {
       console.error(error);
     }
   };
 
-   
   const fetchData = React.useCallback(async () => {
     try {
       const response = await axios.get(
         `http://localhost:5000/files/${id}`
       );
       const files = response.data.files;
-      console.log(response.data.files);
+      console.log(response);
       console.log(typeof files);
       setFiles(files);
     } catch (error) {
@@ -167,54 +87,131 @@ const Document: React.FC = () => {
   React.useEffect(() => {
     fetchData();
   }, []);
+  const handleDownload = async (serverRelativePath?: string) => {
+    try {
+      if (!serverRelativePath) {
+        throw new Error("serverRelativePath parameter is required");
+      }
+      const response = await axios.get(
+        "http://localhost:5000/document/download",
+        {
+          params: { serverRelativePath },
+          paramsSerializer: (params) => {
+            return qs.stringify(params, { encode: false });
+          },
+          responseType: "blob",
+        }
+      );
+      const blob = new Blob([response.data]);
+      const downloadLink = document.createElement("a");
+      downloadLink.href = window.URL.createObjectURL(blob);
+      downloadLink.setAttribute(
+        "download",
+        serverRelativePath.split("/").pop() || ""
+      );
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const filteredFiles = files.filter(file =>
+    file.Name.toLowerCase().includes(searchText.toLowerCase())
+  );
+  const classes = useStyles();
 
   return (
-      <div >
-        <NavBar/>
-        <TaB/>
-        {/* upload section */}
-        <div >
-          <h2 >Upload File</h2>
-          <input type="file" onChange={handleFileSelect} className="mb-2" />
-          <button
-            type="button"
-            onClick={handleUploadClick}
+
+    <div>
+      <NavBar />
+      <TaB />
+      <Container maxWidth="sm">
+        <Paper elevation={3} className={classes.paper}>
+          <Typography variant="h6" className={classes.title}>Search Files</Typography>
+          <Input
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            placeholder="Search by name"
+            fullWidth
+            className={classes.input}
+          />
+        </Paper>
+      </Container>
+      {/* ... */}
+      <Container maxWidth="sm">
+  <Paper elevation={3} style={{ padding: "1rem", marginBottom: "1rem" }}>
+    <Typography variant="h6"  className={classes.title} >Upload File</Typography>
+    <Grid container spacing={2} alignItems="center">
+      <Grid item>
+        <Input
+          type="file"
+          onChange={handleFileSelect}
+          style={{ display: "none" }}
+          id="upload-file"
+        />
+        <label htmlFor="upload-file">
+          <Button
+            variant="contained"
+            color="primary"
+            component="span"
+            startIcon={<CloudUpload />}
           >
-            Upload
-          </button>
-        </div>
+            Select File
+          </Button>
+        </label>
+        <Typography variant="subtitle1">
+          {selectedFile && selectedFile.name}
+        </Typography>
+      </Grid>
+      <Grid item>
+        <Button
+         className={classes.title}
+          variant="contained"
+          color="primary"
+          startIcon={<CloudUpload />}
+          onClick={handleUploadClick}
+          disabled={!selectedFile}
+        >
+          Upload
+        </Button>
+      </Grid>
+    </Grid>
+  </Paper>
+</Container>
 
-        {/* file  */}
-        <div >
-          <h2 >File List</h2>
-          <ul>
-            {files.map((file) => (
-              <li
-                key={file?.Name}
-              >   
-              
-               <span >{file?.Name}</span>
-              
-                              <img src="https://2mxff3.sharepoint.com/sites/sreehari/EmployeLibrary/39/DL.PDF"/>
-               <Card>
-                  <CardContent>
-                    <CardMedia
-                    image="https://2mxff3.sharepoint.com/sites/sreehari/EmployeLibrary/39/profilepic.png"
-                  />
 
-                  </CardContent>
-               </Card>
+      {/* file  */}
+      <Container maxWidth="sm">
+  <Paper elevation={3} style={{ padding: "1rem", marginBottom: "1rem" }}>
+    <Typography variant="h6" className={classes.title}>File List</Typography>
+    <div style={{ height: "300px", overflowY: "auto" }}>
+      <List>
+        {filteredFiles.map((file) => (
+          <ListItem key={file.id} button>
+            <ListItemIcon>
+              <InsertDriveFile />
+            </ListItemIcon>
+            <ListItemText primary={file.Name} />
+            <ListItemSecondaryAction>
+              <IconButton
+                edge="end"
+                aria-label="download"
+                onClick={() => handleDownload(file.ServerRelativeUrl)}
+              >
+                <GetApp />
+              </IconButton>
+            </ListItemSecondaryAction>
+          </ListItem>
+        ))}
+      </List>
+    </div>
+  </Paper>
+</Container>
 
-                <button
-                  onClick={() => window.open(file["odata.id"], "_blank")}
-                >
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <Footer/>
-      </div>
+
+      <Footer />
+    </div>
   );
 };
 

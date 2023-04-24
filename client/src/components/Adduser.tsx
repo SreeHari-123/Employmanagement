@@ -114,10 +114,10 @@ const AddEmploy: React.FC<AddEmployeeProps> = () => {
   return (
     <>
       <NavBar />
-      <IconButton onClick={() => navigate("/")}>
-        <h4>BACK</h4>
-        <ArrowBackIos style={{ fontSize: 30 }} />
-      </IconButton>
+      <IconButton onClick={() => navigate("/")} >
+      <h4>BACK</h4>
+      <ArrowBackIos style={{ fontSize: 30 }} />
+    </IconButton>
       <Card>
         <CardContent>
           <form className={classes.root} onSubmit={handleSubmit}>
@@ -348,18 +348,10 @@ const AddEmploy: React.FC<AddEmployeeProps> = () => {
                     variant="contained"
                     className={classes.submitButton}
                   >
-                    Save
+                    Add Employee
                   </Button>
                 </Grid>
-                <Grid item xs={12} md={8}>
-                  <Button
-                    variant="contained"
-                    className={classes.cancelButton}
-                    onClick={() => navigate("/")}
-                  >
-                    Cancel
-                  </Button>
-                </Grid>
+               
               </Grid>
             </Grid>
           </form>
