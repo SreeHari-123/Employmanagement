@@ -115,6 +115,7 @@ const AddEmploy: React.FC<AddEmployeeProps> = () => {
     <>
       <NavBar />
       <IconButton onClick={() => navigate("/")}>
+        <h4>BACK</h4>
         <ArrowBackIos style={{ fontSize: 30 }} />
       </IconButton>
       <Card>
@@ -310,7 +311,7 @@ const AddEmploy: React.FC<AddEmployeeProps> = () => {
                   error={cityTouched && !isValidName(city)}
                   helperText={
                     cityTouched && !isValidName(city)
-                      ? "Please enter the department"
+                      ? "Please enter City"
                       : null
                   }
                   onBlur={() => setCityTouched(true)}

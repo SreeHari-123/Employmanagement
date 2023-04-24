@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import fileUpload from "express-fileupload";
 import { sp } from "@pnp/sp-commonjs";
 
 const getAllEmploys = async (req: Request, res: Response) => {
@@ -13,7 +14,9 @@ const getSingleEmploy = async (req: Request, res: Response) => {
   let id: number = Number.parseInt(req.params.id);
 
   try {
-    const response = await sp.web.lists.getByTitle("employyy").items.getById(id)();
+    const response = await sp.web.lists
+      .getByTitle("employyy")
+      .items.getById(id)();
     return res.json(response);
   } catch (error) {
     console.log(error);
@@ -35,7 +38,9 @@ const deleteEmploy = async (req: Request, res: Response) => {
       const folderName = `${id}`;
       const documentLibraryName = `EmployeLibrary`;
       const documentLibrary = sp.web.lists.getByTitle(documentLibraryName);
-      const folder = await documentLibrary.rootFolder.folders.getByName(folderName);
+      const folder = await documentLibrary.rootFolder.folders.getByName(
+        folderName
+      );
       await folder.delete();
 
       res.send({ message: "Deleted successfully" });
@@ -97,40 +102,200 @@ const addEmploy = async (req: Request, res: Response) => {
   }
 };
 
-const updateSingleEmploy = 
-  async (req: Request, res: Response) => {
-    let id: number = Number.parseInt(req.params.id);
+const updateSingleEmploy = async (req: Request, res: Response) => {
+  let id: number = Number.parseInt(req.params.id);
 
-    const { first_name, email, designation,department, phone, city } = req.body;
-    console.log(id, "is updated");
-    try {
-      if (isNaN(id)) {
-        res.status(400).json({
-          success: false,
-          message: "Invalid ID provided",
-        });
-        return;
-      } 
-      const updateEmploy = {
-        first_name: first_name,
-        email: email,
-        designation: designation,
-        phone: phone,
-        city: city,
-        department:department
-      }; 
-      const employ = await sp.web.lists
-        .getByTitle("employyy").items.getById(id).update(updateEmploy);
-  
-      res.status(200).json({
-        success: true,
-        message: " Succesfully Updated Employee Details",
-        employ
+  const {
+    first_name,
+    email,
+    designation,
+    department,
+    phone,
+    city,
+    dob,
+    gender,
+  } = req.body;
+  console.log(id, "is updated");
+  try {
+    if (isNaN(id)) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid ID provided",
       });
-    } catch (error) {
-      console.log(error);
-      return res.status(500).json({ error: "Internal server error " });
-    }  
+      return;
+    }
+    const updateEmploy = {
+      first_name: first_name,
+      email: email,
+      designation: designation,
+      phone: phone,
+      city: city,
+      department: department,
+      dob: dob,
+      gender: gender,
+    };
+    const employ = await sp.web.lists
+      .getByTitle("employyy")
+      .items.getById(id)
+      .update(updateEmploy);
+
+    res.status(200).json({
+      success: true,
+      message: " Succesfully Updated Employee Details",
+      employ,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "Internal server error " });
   }
-export { getAllEmploys, deleteEmploy, getSingleEmploy, addEmploy,updateSingleEmploy };
- 
+};
+
+const uploadImage = async (req: Request, res: Response) => {
+  let image = (req?.files as any)?.image;
+
+  console.log("imagetype", image);
+
+  let id: number = Number.parseInt(req.params.id);
+
+  if (!image) {
+    console.error("No file selected");
+    console.log(req.files);
+    return res.status(400).json({
+      success: false,
+      message: "No file selected",
+    });
+  }
+
+  const documentLibraryName = `EmployeLibrary/${id}`;
+  const fileNamePath = `profilepic.png`;
+
+  let result: any;
+  if (image?.size <= 10485760) {
+    // small upload
+    console.log("Starting small file upload");
+    result = await sp.web
+      .getFolderByServerRelativePath(documentLibraryName)
+      .files.addUsingPath(fileNamePath, image.data, { Overwrite: true });
+  } else {
+    // large upload
+    console.log("Starting large file upload");
+    result = await sp.web
+      .getFolderByServerRelativePath(documentLibraryName)
+      .files.addChunked(
+        fileNamePath,
+        image,
+        () => {
+          console.log(`Upload progress: `);
+        },
+        true
+      );
+  }
+
+  console.log("Server relative URL:", result?.data?.ServerRelativeUrl);
+  const url = `https://2mxff3.sharepoint.com${result?.data?.ServerRelativeUrl}`;
+
+  const list = sp.web.lists.getByTitle("employyy");
+
+  try {
+    await list.items.getById(id).update({
+      image: url,
+    });
+
+    console.log("File upload successful");
+    res.status(200).json({
+      success: true,
+      message: "Profile picture uploaded successfully",
+    });
+  } catch (error) {
+    console.error("Error while updating employee item:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error while updating employee item",
+    });
+  }
+};
+//upload document to userfolder by id
+const uploadDocument = async (req: Request, res: Response) => {
+  let file = (req?.files as any)?.file;
+  let id: number = Number.parseInt(req.params.id);
+  console.log("imagetype", file);
+
+  if (!file) {
+    console.error("No file selected");
+    return res.status(400).json({
+      success: false,
+      message: "No file selected",
+    });
+  }
+
+  const documentLibraryName = `EmployeLibrary/${id}`;
+  const fileNamePath = file.name;
+
+  let result: any;
+  if (file?.size <= 10485760) {
+    // small upload
+    console.log("Starting small file upload");
+    result = await sp.web
+      .getFolderByServerRelativePath(documentLibraryName)
+      .files.addUsingPath(fileNamePath, file.data, { Overwrite: true });
+  } else {
+    // large upload
+    console.log("Starting large file upload");
+    result = await sp.web
+      .getFolderByServerRelativePath(documentLibraryName)
+      .files.addChunked(
+        fileNamePath,
+        file,
+        () => {
+          console.log(`Upload progress: `);
+        },
+        true
+      );
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Document Uploaded succesfullly",
+  });
+};
+// Get all files in a directory
+const getFilesInDirectory = async (req: Request, res: Response) => {
+  let id: number = Number.parseInt(req.params.id);
+  console.log("files listn");
+  const documentLibraryName = `EmployeLibrary/${id}`;
+
+  try {
+    const folder = await sp.web
+    
+      .getFolderByServerRelativePath(documentLibraryName)
+      .files.get();
+    console.log("Folder : ",folder);
+    console.log(documentLibraryName);
+
+    const files = folder.map((file: any) => {
+      return file;
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Retrieved files in directory",
+      files,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Error retrieving files in directory",
+    });
+  }
+};
+export {
+  getAllEmploys,
+  deleteEmploy,
+  getSingleEmploy,
+  addEmploy,
+  updateSingleEmploy,
+  uploadImage,
+  uploadDocument,
+  getFilesInDirectory,
+};

@@ -6,6 +6,8 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import { useNavigate } from 'react-router-dom';
+import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
+
 export default function ButtonAppBar() {
     const navigate= useNavigate();
     return (
@@ -20,6 +22,8 @@ export default function ButtonAppBar() {
                         sx={{ mr: 2 }}
                     >
                     </IconButton>
+                    <SupervisorAccountIcon fontSize='large'/>
+
                     <Typography variant="h6" component="div" sx={{ flexGrow: 0 }} onClick={()=> navigate('/')}>
                         HR PORTAL
                     </Typography>

@@ -7,8 +7,18 @@ function Home() {
   return (
     <div>
       <NavBar />
-      <Cards />
-      <Footer/>
+      <Cards employee={{
+        id: undefined,
+        first_name: undefined,
+        email: undefined,
+        gender: undefined,
+        department: undefined,
+        designation: undefined,
+        phone: undefined,
+        city: undefined,
+        image: undefined
+      }} />
+      <Footer />
     </div>
   );
 }

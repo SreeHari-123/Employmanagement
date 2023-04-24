@@ -13,6 +13,7 @@ import {
   Button,
 } from "@material-ui/core";
 import { useNavigate } from "react-router-dom";
+import { IEmployee } from "../types";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -47,12 +48,16 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: theme.spacing(2),
   },
 }));
+interface Props {
+  employee: IEmployee;
+}
 
-const Cards = () => {
+const Cards:React.FC<Props> = ({employee}) => {
   const [user, setUser] = useState<any>(null);
   const [isLoad, setLoad] = useState<boolean>(true);
   const [search, setSearch] = useState<string>("");
   const classes = useStyles();
+  const {image}= employee;
   const navigate = useNavigate();
 
   const getAllEmployee = async () => {
@@ -120,7 +125,7 @@ const Cards = () => {
               <CardActionArea>
                 <CardMedia
                   className={classes.media}
-                  image="https://static.vecteezy.com/system/resources/thumbnails/012/415/723/small/portrait-of-successful-businesswoman-free-photo.jpg"
+                  image={data?.image}
                   // title={data?.first_name}
                 />
                 <CardContent>

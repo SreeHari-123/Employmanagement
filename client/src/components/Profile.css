@@ -7,8 +7,8 @@
   transition: background-color 0.2s ease-in-out;
 }
 .ip[type="text"],
-input[type="email"],
-input[type="date"] {
+.ip[type="email"],
+.ip[type="date"] {
   padding: 0.5rem;
   font-size: 1rem;
   border-radius: 0.5rem;
